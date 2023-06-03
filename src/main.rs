@@ -1,14 +1,15 @@
+use anyhow::{Context, Result};
 use std::fs;
 
+fn read_file(path: &str) -> Result<String> {
+    let file = fs::read(path).context("Failed to load file on path")?;
+    return String::from_utf8(file).context("Failed tp parse file");
+}
+
 fn main() {
-    let svg_file = fs::read("icons/search-icon.svg");
-    if svg_file.is_err() {
-        panic!("Could not read file");
+    let svg_file = read_file("icons/search-icon.svg");
+    match svg_file {
+        Err(e) => println!("{}", e),
+        Ok(result) => println!("{:?}", result),
     }
-    let content = svg_file.unwrap();
-    let result = String::from_utf8(content);
-    if result.is_err() {
-        panic!("Failed parsing content")
-    }
-    println!("{:?}", result);
 }
