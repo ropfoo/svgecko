@@ -1,19 +1,20 @@
 use anyhow::{Context, Ok, Result};
-use std::{fs, process::id, str::FromStr};
+use std::{collections::HashMap, fs, process::id, str::FromStr};
 
-fn split_attributes(s: &str, element_tag: &str) {
-    let parts = s
+fn split_attributes(s: &str, element_tag: &str) -> HashMap<String, String> {
+    return s
         .replace(element_tag, "")
         .replace(">", "")
         .split_terminator("\" ")
         .filter(|&p| p.contains("="))
-        .for_each(|p| {
+        .fold(HashMap::new(), |mut map, p| {
             let thing = p.replace("\"", "");
             let res = thing.split_once("=");
             if res.is_some() {
                 let (key, value) = res.unwrap();
-                println!("key:{} ,value {}", key, value);
+                map.insert(String::from(key), String::from(value));
             }
+            return map;
         });
 }
 
@@ -27,12 +28,11 @@ impl FromStr for Svg {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        split_attributes(s, "svg");
-        // println!("{:?}", parts);
-        return Ok(Svg {
-            width: 0,
-            height: 1,
-        });
+        let parts = split_attributes(s, "svg");
+        println!("{:?}", parts);
+        let width: i32 = parts.get(" width").unwrap().parse().unwrap();
+        let height: i32 = parts.get("height").unwrap().parse().unwrap();
+        return Ok(Svg { width, height });
     }
 }
 
@@ -62,12 +62,9 @@ fn create_parts(s: &str) {
         if idx == 1 {
             let attribute_name = part.split_whitespace().next().unwrap_or("");
             // TODO handle get by attribute
-            Svg::from_str(part);
+            let svg = Svg::from_str(part).unwrap();
             elements.push(Node {
-                element: Element::Svg(Svg {
-                    width: 10,
-                    height: 10,
-                }),
+                element: Element::Svg(svg),
                 children: None,
             })
         }
