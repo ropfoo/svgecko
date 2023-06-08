@@ -1,6 +1,7 @@
+use anyhow::{anyhow, Ok, Result};
 use std::{collections::HashMap, str::FromStr};
 
-use crate::element::svg::Svg;
+use crate::element::svg::{Svg, SVG_TAG_NAME};
 
 mod svg;
 
@@ -12,14 +13,18 @@ struct Node {
 
 #[derive(Debug)]
 pub enum Element {
-    Svg(Svg),
+    Svg(Result<Svg>),
 }
 
-impl Element {
-    fn name(&self) -> &str {
-        match self {
-            Element::Svg(_) => "svg",
-        }
+impl FromStr for Element {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        let attribute_name = s.split_whitespace().next().unwrap_or("");
+        return match attribute_name {
+            SVG_TAG_NAME => Ok(Element::Svg(Svg::from_str(s))),
+            _ => Err(anyhow!("Could not create element from given string")),
+        };
     }
 }
 
@@ -41,19 +46,19 @@ fn split_attributes(s: &str, element_tag: &str) -> HashMap<String, String> {
 }
 pub fn create_parts(s: &str) {
     let parts = s.split_terminator("<");
-    let mut elements: Vec<Node> = vec![];
+    let mut nodes: Vec<Node> = vec![];
     parts.enumerate().for_each(|(idx, part)| {
         if idx == 1 {
-            let attribute_name = part.split_whitespace().next().unwrap_or("");
-            // TODO handle get by attribute
-            let svg = Svg::from_str(part).unwrap();
-            elements.push(Node {
-                element: Element::Svg(svg),
-                children: None,
-            })
+            let element = Element::from_str(part);
+            if element.is_ok() {
+                nodes.push(Node {
+                    element: element.unwrap(),
+                    children: None,
+                })
+            }
         }
 
         if part.ends_with("/>") {}
     });
-    println!("{:?}", elements)
+    println!("{:?}", nodes)
 }

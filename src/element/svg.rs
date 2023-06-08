@@ -2,6 +2,8 @@ use crate::element::split_attributes;
 use anyhow::{Ok, Result};
 use std::str::FromStr;
 
+pub const SVG_TAG_NAME: &str = "svg";
+
 #[derive(Debug)]
 pub struct Svg {
     width: i32,
