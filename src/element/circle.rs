@@ -6,7 +6,7 @@ pub const CIRCLE_TAG_NAME: &str = "circle";
 
 #[derive(Debug)]
 pub struct Circle {
-    fill: String,
+    fill: Option<String>,
     cx: f32,
     cy: f32,
     r: f32,
@@ -21,12 +21,7 @@ impl FromStr for Circle {
         let cx = parts.get("cx").unwrap().parse().unwrap();
         let cy = parts.get("cy").unwrap().parse().unwrap();
         let r = parts.get("r").unwrap().parse().unwrap();
-        // let fill = parts.get("fill").unwrap().parse().unwrap();
-        return Ok(Circle {
-            cx,
-            cy,
-            r,
-            fill: String::from(""),
-        });
+        let fill = parts.get("fill").cloned();
+        return Ok(Circle { cx, cy, r, fill });
     }
 }
