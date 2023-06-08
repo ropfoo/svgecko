@@ -16,7 +16,7 @@ impl FromStr for Svg {
     fn from_str(s: &str) -> Result<Self> {
         let parts = split_attributes(s, "svg");
         println!("{:?}", parts);
-        let width: i32 = parts.get(" width").unwrap().parse().unwrap();
+        let width: i32 = parts.get("width").unwrap().parse().unwrap();
         let height: i32 = parts.get("height").unwrap().parse().unwrap();
         return Ok(Svg { width, height });
     }
