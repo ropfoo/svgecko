@@ -1,6 +1,6 @@
 use anyhow::{Context, Ok, Result};
-use element::create_parts;
-use std::fs;
+use element::create_node;
+use std::{fs, ops::RangeFrom};
 
 mod element;
 
@@ -15,6 +15,13 @@ fn main() {
     if svg_file.is_err() {
         return;
     }
+
     let svg_string = svg_file.unwrap();
-    create_parts(&svg_string);
+    let content = svg_string.replace("\n", "");
+    let parts: Vec<&str> = content
+        .split_terminator("<")
+        .filter(|&row| row != "")
+        .collect();
+
+    create_node(&parts, RangeFrom { start: 1 });
 }
